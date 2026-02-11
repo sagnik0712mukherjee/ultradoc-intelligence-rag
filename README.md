@@ -1,6 +1,6 @@
 # UltraDoc Intelligence RAG System
 
-A production-grade Retrieval-Augmented Generation (RAG) system designed for logistics document processing. This system extracts structured information from documents, enables semantic question answering, and implements robust guardrails to prevent hallucinations.
+A Retrieval-Augmented Generation (RAG) system designed for logistics document processing. This system extracts structured information from documents, enables semantic question answering, and implements robust guardrails to prevent hallucinations.
 
 ## Architecture
 
