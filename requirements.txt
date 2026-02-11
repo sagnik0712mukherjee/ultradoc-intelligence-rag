@@ -1,0 +1,9 @@
+pypdf
+python-docx
+faiss-cpu
+numpy
+fastapi
+uvicorn
+python-multipart
+streamlit
+requests
