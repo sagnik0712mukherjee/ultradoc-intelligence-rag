@@ -6,8 +6,8 @@ and FAISS similarity search.
 """
 
 from typing import List, Dict, Tuple
-from src.core.embedding_service import EmbeddingService
-from src.core.vector_store import VectorStore
+from src.core.services.embedding_service import EmbeddingService
+from src.core.data.vector_store import VectorStore
 from src.config.settings import SIMILARITY_THRESHOLD, TOP_K_RETRIEVAL
 
 
@@ -51,7 +51,6 @@ class Retriever:
         search_results: List[Tuple[Dict[str, str], float]] = self.vector_store.search(
             query_embedding, TOP_K_RETRIEVAL
         )
-        print("\n\nSearch Results Raw:", search_results)
 
         filtered_chunks: List[Dict[str, str]] = []
         max_similarity_score: float = 0.0

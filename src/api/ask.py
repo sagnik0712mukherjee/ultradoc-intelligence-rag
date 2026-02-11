@@ -4,12 +4,12 @@ Ask API Module
 
 from fastapi import APIRouter
 from typing import Dict
-from src.core.embedding_service import EmbeddingService
-from src.core.retriever import Retriever
-from src.core.guardrails import Guardrails
-from src.core.answer_generator import AnswerGenerator
-from src.core.confidence import ConfidenceScorer
-import src.core.app_state as app_state
+from src.core.services.embedding_service import EmbeddingService
+from src.core.services.retriever import Retriever
+from src.core.evaluator.guardrails import Guardrails
+from src.core.services.answer_generator import AnswerGenerator
+from src.core.evaluator.confidence import ConfidenceScorer
+import src.core.state.app_state as app_state
 
 router = APIRouter()
 
@@ -62,7 +62,9 @@ async def ask_question(query: str, api_key: str) -> Dict:
 
     if confidence_validation.get("status") == "reject":
         return {
-            "answer": confidence_validation.get("message"),
+            "answer": answer
+            if answer == "Not found in document."
+            else confidence_validation.get("message"),
             "confidence": confidence_score,
             "sources": [],
         }

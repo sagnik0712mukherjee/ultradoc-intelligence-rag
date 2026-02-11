@@ -65,7 +65,7 @@ class Guardrails:
         if confidence_score < MIN_CONFIDENCE_SCORE:
             return {
                 "status": "reject",
-                "message": "Low confidence in generated answer.",
+                "message": "I have low confidence in the generated answer.",
             }
 
         return {"status": "allow", "message": "Confidence acceptable."}

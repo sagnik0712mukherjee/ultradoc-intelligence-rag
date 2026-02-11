@@ -9,7 +9,7 @@ Generates grounded conversational answers using:
 from typing import List, Dict
 from openai import OpenAI
 from src.config.settings import LLM_MODEL_NAME
-from src.core.memory_manager import MemoryManager
+from src.core.state.memory_manager import MemoryManager
 
 
 class AnswerGenerator:

@@ -4,8 +4,8 @@ Extract API Module
 
 from fastapi import APIRouter
 from typing import Dict
-from src.core.structured_extractor import StructuredExtractor
-import src.core.app_state as app_state
+from src.core.data.structured_extractor import StructuredExtractor
+import src.core.state.app_state as app_state
 
 router = APIRouter()
 
