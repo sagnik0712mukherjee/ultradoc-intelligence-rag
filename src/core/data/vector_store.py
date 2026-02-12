@@ -1,7 +1,8 @@
 """
 Vector Store Module
 
-Implements FAISS-based vector indexing and similarity retrieval.
+Implements FAISS-based HNSW vector indexing
+with cosine similarity using Inner Product metric.
 """
 
 from typing import List, Dict, Tuple
@@ -12,12 +13,13 @@ from src.config.settings import TOP_K_RETRIEVAL
 
 class VectorStore:
     """
-    A FAISS-based vector store for similarity search.
+    A FAISS-based vector store using HNSW indexing
+    for approximate nearest neighbor search.
     """
 
     def __init__(self, embedding_dimension: int) -> None:
         """
-        Initialize FAISS index.
+        Initialize FAISS HNSW index.
 
         Args:
             embedding_dimension (int): Dimension of embedding vectors.
@@ -25,10 +27,18 @@ class VectorStore:
 
         self.embedding_dimension: int = embedding_dimension
 
-        # Using Inner Product index (for cosine similarity after normalization)
-        self.index = faiss.IndexFlatIP(embedding_dimension)
+        # HNSW index with Inner Product metric
+        # 32 = number of neighbors per node (M parameter)
+        self.index = faiss.IndexHNSWFlat(
+            embedding_dimension, 32, faiss.METRIC_INNER_PRODUCT
+        )
 
-        # Store metadata for each vector
+        # Optional HNSW tuning parameters
+        # Higher values improve accuracy but increase memory/time
+        self.index.hnsw.efConstruction = 200
+        self.index.hnsw.efSearch = 50
+
+        # Metadata storage aligned with vector index
         self.metadata_store: List[Dict[str, str]] = []
 
     def _normalize_vectors(self, vectors: np.ndarray) -> np.ndarray:
@@ -39,10 +49,13 @@ class VectorStore:
             vectors (np.ndarray): Input vectors.
 
         Returns:
-            np.ndarray: Normalized vectors.
+            np.ndarray: L2-normalized vectors.
         """
 
         norms: np.ndarray = np.linalg.norm(vectors, axis=1, keepdims=True)
+
+        # Prevent division by zero
+        norms[norms == 0] = 1.0
 
         normalized_vectors: np.ndarray = vectors / norms
 
@@ -52,7 +65,7 @@ class VectorStore:
         self, embeddings: List[List[float]], metadata: List[Dict[str, str]]
     ) -> None:
         """
-        Add embeddings and metadata to FAISS index.
+        Add embedding vectors and metadata to FAISS index.
 
         Args:
             embeddings (List[List[float]]): Embedding vectors.

@@ -5,7 +5,7 @@ Uses GPT-4.1 to normalize layout-aware content
 into canonical structured JSON.
 """
 
-from src.config.settings import LLM_MODEL_NAME
+from src.config.settings import CHUNKING_LLM_MODEL
 from typing import Dict, Any
 from openai import OpenAI
 from src.core.data.schemas import StructuredDocumentModel
@@ -69,7 +69,7 @@ class LLMStructuredExtractor:
         """
 
         response = self.client.chat.completions.create(
-            model=LLM_MODEL_NAME,
+            model=CHUNKING_LLM_MODEL,
             temperature=0,
             messages=[
                 {"role": "system", "content": system_prompt},

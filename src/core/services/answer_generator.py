@@ -8,7 +8,7 @@ Generates grounded conversational answers using:
 
 from typing import List, Dict
 from openai import OpenAI
-from src.config.settings import LLM_MODEL_NAME
+from src.config.settings import MAIN_LLM_MODEL
 from src.core.state.memory_manager import MemoryManager
 
 
@@ -76,7 +76,7 @@ class AnswerGenerator:
         """
 
         response = self.client.chat.completions.create(
-            model=LLM_MODEL_NAME,
+            model=MAIN_LLM_MODEL,
             messages=[
                 {"role": "system", "content": system_prompt},
                 {"role": "user", "content": user_prompt},

@@ -111,19 +111,6 @@ def main() -> None:
             st.markdown("### Supporting Sources")
             st.text_area("Sources", value=response.get("sources", ""), height=200)
 
-    st.divider()
-
-    st.subheader("Structured Shipment Extraction")
-
-    if st.button("Run Structured Extraction") and api_key:
-        with st.spinner("Extracting structured data..."):
-            response = extract_structured_data(api_key)
-
-        if "error" in response:
-            st.error(response["error"])
-        else:
-            st.json(response)
-
     if st.sidebar.button("Clear Conversation Memory"):
         requests.post(f"{API_BASE_URL}/clear_memory")
         st.success("Memory cleared.")

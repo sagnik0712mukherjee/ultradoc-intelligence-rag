@@ -10,15 +10,15 @@ The system follows a modular architecture with clear separation of concerns:
 
 **Data Layer** (`src/core/data/`)
 - **Document Processor**: Extracts raw text from PDF, DOCX, and TXT files using PyPDF and pdfplumber
-- **LLM Structured Extractor**: Uses GPT-4.1 to normalize document text into canonical JSON format
+- **LLM Structured Extractor**: Uses GPT-3.5 Turbo (temperature=0) for deterministic, cost-effective structure extraction
 - **Chunker**: Breaks structured JSON into field-level semantic chunks for granular retrieval
-- **Vector Store**: In-memory FAISS index for efficient similarity search
+- **Vector Store**: FAISS HNSW index for fast approximate nearest neighbor search with cosine similarity
 - **Schemas**: Pydantic models for data validation
 
 **Services Layer** (`src/core/services/`)
-- **Embedding Service**: Generates embeddings using OpenAI's text-embedding-3-large model
-- **Retriever**: Orchestrates embedding generation and vector similarity search
-- **Answer Generator**: Generates grounded answers using GPT-4.1 with conversational memory
+- **Embedding Service**: Generates embeddings using OpenAI's text-embedding-3-large model (3072 dimensions)
+- **Retriever**: Orchestrates embedding generation and HNSW-based vector similarity search
+- **Answer Generator**: Generates grounded answers using GPT-4o-mini with conversational memory
 
 **Evaluator Layer** (`src/core/evaluator/`)
 - **Guardrails**: Two-stage validation to prevent hallucinations
@@ -42,7 +42,7 @@ Streamlit-based UI providing document upload, Q&A interface, and structured extr
 
 ## Chunking Strategy
 
-The system uses **field-level semantic chunking** optimized for structured documents. Raw text is first converted to structured JSON using GPT-4.1, then each field becomes an independent chunk with section metadata preserved.
+The system uses **field-level semantic chunking** optimized for structured documents. Raw text is first converted to structured JSON using **GPT-3.5 Turbo** (with temperature=0 for deterministic extraction), then each field becomes an independent chunk with section metadata preserved.
 
 **Example:**
 ```
@@ -60,14 +60,34 @@ By embedding each key-value pair independently, similarity scores improved signi
 
 This approach mirrors document indexing strategies used in Elasticsearch and modern vector databases. It provides precision (queries retrieve only relevant fields), scalability (works with varying document structures), and flexibility (handles nested objects naturally). The tradeoff is requiring an upfront LLM call for structure extraction, but this enables much more accurate retrieval downstream.
 
+## LLM Model Selection
+
+The system uses **two separate LLM models** optimized for different tasks:
+
+**GPT-3.5 Turbo** (Chunking & Structure Extraction)
+- Used with temperature=0 for deterministic, reproducible outputs
+- Cost-effective for high-volume document processing
+- Sufficient capability for structured extraction tasks
+- Ensures consistent JSON schema compliance
+
+**GPT-4o-mini** (Answer Generation)
+- Higher reasoning capability for nuanced question answering
+- Better at grounding answers in retrieved context
+- Balances quality and cost for user-facing responses
+- Handles conversational memory and follow-up questions effectively
+
+This segregation optimizes both **cost** (using cheaper models where appropriate) and **quality** (using stronger models for critical user interactions).
+
 ## Retrieval Method
 
-The system implements **semantic similarity-based retrieval** using FAISS:
+The system implements **semantic similarity-based retrieval** using **FAISS HNSW** (Hierarchical Navigable Small World) indexing:
 
 1. **Query Embedding**: User question is embedded using text-embedding-3-large (3072 dimensions)
-2. **Vector Search**: FAISS performs cosine similarity search against indexed chunks
+2. **HNSW Vector Search**: FAISS performs approximate nearest neighbor search using HNSW graph structure for fast retrieval
 3. **Top-K Selection**: Retrieves top 4 most similar chunks
 4. **Threshold Filtering**: Only chunks with similarity >= 0.30 are retained
+
+**Why HNSW?** HNSW provides significantly faster search times compared to flat indexing, especially as the document corpus grows. The graph-based structure enables sub-linear search complexity while maintaining high recall. We use Inner Product metric with L2-normalized vectors to compute cosine similarity.
 
 The similarity threshold of 0.30 was chosen to accommodate variance in question phrasing while filtering out clearly irrelevant chunks. This is intentionally permissive because the guardrails layer provides additional validation.
 
@@ -208,7 +228,8 @@ SIMILARITY_THRESHOLD = 0.30      # Minimum similarity for retrieval
 MIN_CONFIDENCE_SCORE = 0.45      # Minimum confidence to return answer
 MAX_SHORT_TERM_MEMORY = 10       # Conversation history length
 EMBEDDING_MODEL = "text-embedding-3-large"
-LLM_MODEL = "gpt-4.1"
+CHUNKING_LLM_MODEL = "gpt-3.5-turbo"    # For deterministic structure extraction
+MAIN_LLM_MODEL = "gpt-4o-mini"          # For answer generation
 ```
 
 ## Author
