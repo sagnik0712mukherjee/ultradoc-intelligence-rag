@@ -19,6 +19,13 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+
+# Health check endpoint for Render
+@app.get("/")
+def health_check():
+    return {"status": "healthy", "service": "UltraDoc RAG API"}
+
+
 app.include_router(upload_router)
 
 app.include_router(ask_router)
