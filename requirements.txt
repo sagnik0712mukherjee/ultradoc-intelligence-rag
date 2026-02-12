@@ -1,21 +1,12 @@
-# Core dependencies
-pypdf==4.0.1
-python-docx==1.1.0
-pdfplumber==0.11.0
-
-# Vector store - use version that supports Python 3.11
-faiss-cpu>=1.8.0
-numpy>=1.24.3
-
-# API framework
-fastapi==0.109.0
-uvicorn[standard]==0.27.0
-python-multipart==0.0.6
-
-# Frontend
-streamlit==1.31.0
-requests==2.31.0
-
-# AI/ML
-openai==1.12.0
-pydantic==2.6.0
+pypdf
+python-docx
+pdfplumber
+faiss-cpu
+numpy
+fastapi
+uvicorn[standard]
+python-multipart
+streamlit
+requests
+openai
+pydantic
