@@ -2,6 +2,30 @@
 
 A Retrieval-Augmented Generation (RAG) system designed for logistics document processing. This system extracts structured information from documents, enables semantic question answering, and implements robust guardrails to prevent hallucinations.
 
+## Live Demo
+
+> **Note**: Replace these URLs with your actual deployment URLs after deploying.
+
+- **Hosted UI**: `https://ultradoc-intelligence-rag.streamlit.app` (Deployed to Streamlit Cloud)
+- **Backend API**: `https://web-production-967fbd.up.railway.app` (Deployed to Railway.app)
+
+### API Endpoints
+
+- `POST /upload` - Upload and index documents
+- `POST /ask` - Ask questions about documents  
+- `POST /extract` - Extract structured data from documents
+
+### Using the Hosted Demo
+
+1. Visit the hosted UI link above
+2. **Enter your own OpenAI API key** in the sidebar (required - no key is stored on the server)
+3. Upload a logistics document (PDF, DOCX, or TXT)
+4. Ask questions about the uploaded document
+5. View answers with confidence scores and supporting sources
+
+> **Important**: You must provide your own OpenAI API key. The system does not store or persist any API keys.
+
+
 ## Architecture
 
 The system follows a modular architecture with clear separation of concerns:
