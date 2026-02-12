@@ -5,8 +5,10 @@ Streamlit UI for UltraDoc Intelligence RAG System
 import streamlit as st
 import requests
 from typing import Dict
+import os
 
-API_BASE_URL: str = "http://127.0.0.1:8000"
+# Backend URL - configurable for cloud deployment
+API_BASE_URL: str = os.getenv("BACKEND_URL", "http://127.0.0.1:8000")
 
 
 def upload_document(file, api_key: str) -> Dict:
