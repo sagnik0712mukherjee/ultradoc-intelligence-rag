@@ -40,23 +40,30 @@ class LLMStructuredExtractor:
         Convert the provided document into structured JSON.
 
         STRICT RULES:
-        1. Extract ALL key-value pairs.
-        2. Preserve tables as structured key-value rows.
-        3. Do NOT hallucinate fields.
-        4. If uncertain, include under section "unclassified".
-        5. Ensure no information is omitted.
-        6. Output STRICTLY valid JSON.
+        1. MANDATORY: Populate "shipment_details" by mapping document fields to the canonical keys.
+           - Shipment_id: look for "Load ID", "Order #", "Shipment #", etc.
+           - shipper/consignee: extract the main parties listed.
+           - weight: look for values with "lbs", "kg", "kgs".
+           - dates: look for "Ship Date", "Delivery Date", "Pickup Date".
+        2. If the document is LOGISTICS/CARRIER related (Bills of Lading, Freight Invoices), you MUST populate the details.
+        3. If it is NOT a logistics document (e.g., a personal phone bill), set "shipment_details" fields to null.
+        4. Output STRICTLY valid JSON. Do NOT include any other keys like "sections".
 
         Expected schema:
         {
-        "sections": [
-            {
-            "section_name": "...",
-            "content": {
-                "key": "value"
-            }
-            }
-        ]
+          "shipment_details": {
+            "Shipment_id": "...",
+            "shipper": "...",
+            "consignee": "...",
+            "pickup_datetime": "...",
+            "delivery_datetime": "...",
+            "equipment_type": "...",
+            "mode": "...",
+            "rate": "...",
+            "currency": "...",
+            "weight": "...",
+            "carrier_name": "..."
+          }
         }
         """
 
@@ -79,10 +86,18 @@ class LLMStructuredExtractor:
 
         raw_output: str = response.choices[0].message.content
 
+        # Robust JSON extraction (handle markdown blocks)
+        if "```json" in raw_output:
+            raw_output = raw_output.split("```json")[1].split("```")[0].strip()
+        elif "```" in raw_output:
+            raw_output = raw_output.split("```")[1].split("```")[0].strip()
+
         try:
             parsed_json = json.loads(raw_output)
             validated = StructuredDocumentModel(**parsed_json)
             return validated.dict()
 
-        except (json.JSONDecodeError, ValidationError):
-            raise ValueError("LLM output validation failed.")
+        except (json.JSONDecodeError, ValidationError) as e:
+            raise ValueError(
+                f"LLM output validation failed: {str(e)}. Raw output: {raw_output[:100]}..."
+            )

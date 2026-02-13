@@ -20,11 +20,11 @@ MIN_CONFIDENCE_SCORE: float = 0.45
 
 EMBEDDING_MODEL_NAME: str = "text-embedding-3-large"
 
-# Chunking LLM - GPT-3.5 for deterministic, cost-effective structure extraction
-CHUNKING_LLM_MODEL: str = "gpt-3.5-turbo"
+# Structured Extraction LLM - GPT-4o-mini for deterministic, cost-effective structure extraction
+CHUNKING_LLM_MODEL: str = "gpt-4o-mini"
 
-# Main LLM - GPT-4o-mini for high-quality answer generation
-MAIN_LLM_MODEL: str = "gpt-4o-mini"
+# Main LLM - GPT-4.1 for high-quality answer generation
+MAIN_LLM_MODEL: str = "gpt-4.1"
 
 # =========================
 # Memory Configuration

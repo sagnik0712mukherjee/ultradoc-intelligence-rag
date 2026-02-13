@@ -64,7 +64,13 @@ def extract_structured_data(api_key: str) -> Dict:
 
     response = requests.post(f"{API_BASE_URL}/extract", params={"api_key": api_key})
 
-    return response.json()
+    try:
+        response.raise_for_status()
+        return response.json()
+    except requests.exceptions.HTTPError as e:
+        return {"error": f"Backend Error: {str(e)}"}
+    except requests.exceptions.JSONDecodeError:
+        return {"error": "Failed to decode JSON response from backend."}
 
 
 def main() -> None:
@@ -108,7 +114,10 @@ def main() -> None:
             st.write(response.get("answer"))
 
             st.markdown("### Confidence Score")
-            st.write(round(response.get("confidence"), 4))
+            st.write(round(response.get("confidence", 0.0), 4))
+
+            st.markdown("### Retrieval Metric (Precision@4)")
+            st.write(round(response.get("precision_at_k", 0.0), 4))
 
             st.markdown("### Supporting Sources")
             st.text_area("Sources", value=response.get("sources", ""), height=200)
@@ -116,6 +125,19 @@ def main() -> None:
     if st.sidebar.button("Clear Conversation Memory"):
         requests.post(f"{API_BASE_URL}/clear_memory")
         st.success("Memory cleared.")
+
+    st.divider()
+
+    st.subheader("Structured Shipment Extraction")
+
+    if st.button("Run Structured Extraction") and api_key:
+        with st.spinner("Extracting structured data..."):
+            response = extract_structured_data(api_key)
+
+        if "error" in response:
+            st.error(response["error"])
+        else:
+            st.json(response)
 
 
 if __name__ == "__main__":

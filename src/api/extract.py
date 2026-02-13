@@ -3,8 +3,8 @@ Extract API Module
 """
 
 from fastapi import APIRouter
-from typing import Dict
-from src.core.data.structured_extractor import StructuredExtractor
+from typing import Dict, Any
+from src.core.data.llm_structured_extractor import LLMStructuredExtractor
 import src.core.state.app_state as app_state
 
 router = APIRouter()
@@ -25,10 +25,13 @@ async def extract_structured_data(api_key: str) -> Dict:
     if not app_state.DOCUMENT_TEXT_STORAGE:
         return {"error": "No document uploaded."}
 
-    extractor: StructuredExtractor = StructuredExtractor(api_key)
+    try:
+        extractor: LLMStructuredExtractor = LLMStructuredExtractor(api_key)
 
-    structured_output: Dict[str, str] = extractor.extract(
-        app_state.DOCUMENT_TEXT_STORAGE
-    )
+        structured_output: Dict[str, Any] = extractor.extract(
+            app_state.DOCUMENT_TEXT_STORAGE
+        )
 
-    return structured_output
+        return structured_output
+    except Exception as e:
+        return {"error": f"Extraction failed: {str(e)}"}
