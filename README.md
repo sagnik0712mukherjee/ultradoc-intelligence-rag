@@ -42,7 +42,7 @@ The system follows a modular architecture with clear separation of concerns:
 **Services Layer** (`src/core/services/`)
 - **Embedding Service**: Generates embeddings using OpenAI's text-embedding-3-large model (3072 dimensions)
 - **Retriever**: Orchestrates embedding generation and HNSW-based vector similarity search
-- **Answer Generator**: Generates grounded answers using GPT-4o-mini with conversational memory
+- **Answer Generator**: Generates grounded answers using GPT-4.1 with conversational memory
 
 **Evaluator Layer** (`src/core/evaluator/`)
 - **Guardrails**: Two-stage validation to prevent hallucinations
@@ -66,7 +66,7 @@ Streamlit-based UI providing document upload, Q&A interface, and structured extr
 
 ## Chunking Strategy
 
-The system uses **field-level semantic chunking** optimized for structured documents. Raw text is first converted to structured JSON using **GPT-3.5 Turbo** (with temperature=0 for deterministic extraction), then each field becomes an independent chunk with section metadata preserved.
+The system uses **field-level semantic chunking** optimized for structured documents. Raw text is first converted to structured JSON using **GPT-4o Mini** (with temperature=0 for deterministic extraction), then each field becomes an independent chunk with section metadata preserved.
 
 **Example:**
 ```
@@ -88,13 +88,13 @@ This approach mirrors document indexing strategies used in Elasticsearch and mod
 
 The system uses **two separate LLM models** optimized for different tasks:
 
-**GPT-3.5 Turbo** (Chunking & Structure Extraction)
+**GPT-4o Mini** (Chunking & Structure Extraction)
 - Used with temperature=0 for deterministic, reproducible outputs
 - Cost-effective for high-volume document processing
 - Sufficient capability for structured extraction tasks
 - Ensures consistent JSON schema compliance
 
-**GPT-4o-mini** (Answer Generation)
+**GPT-4.1** (Answer Generation)
 - Higher reasoning capability for nuanced question answering
 - Better at grounding answers in retrieved context
 - Balances quality and cost for user-facing responses
@@ -229,9 +229,10 @@ Future production deployment would include Docker containerization and environme
 
 ```
 ultradoc-intelligence-rag/
+├── .streamlit                 # Streamlit configuration
 ├── src/
-│   ├── api/                    # FastAPI endpoints
-│   ├── config/                 # Configuration settings
+│   ├── api/                   # FastAPI endpoints
+│   ├── config/                # Configuration settings
 │   └── core/
 │       ├── data/              # Data processing and storage
 │       ├── evaluator/         # Guardrails and confidence scoring
@@ -239,7 +240,9 @@ ultradoc-intelligence-rag/
 │       └── state/             # Application state management
 ├── streamlit_app.py           # Frontend UI
 ├── requirements.txt           # Python dependencies
-└── README.md                  # This file
+├── README.md                  # This file
+├── Procfile                   # Initiate Backend
+└── render.yaml                # Render deployment configuration
 ```
 
 ## Configuration
@@ -252,8 +255,8 @@ SIMILARITY_THRESHOLD = 0.30      # Minimum similarity for retrieval
 MIN_CONFIDENCE_SCORE = 0.45      # Minimum confidence to return answer
 MAX_SHORT_TERM_MEMORY = 10       # Conversation history length
 EMBEDDING_MODEL = "text-embedding-3-large"
-CHUNKING_LLM_MODEL = "gpt-3.5-turbo"    # For deterministic structure extraction
-MAIN_LLM_MODEL = "gpt-4o-mini"          # For answer generation
+CHUNKING_LLM_MODEL = "gpt-4o-mini"    # For deterministic structure extraction
+MAIN_LLM_MODEL = "gpt-4.1"          # For answer generation
 ```
 
 ## Author

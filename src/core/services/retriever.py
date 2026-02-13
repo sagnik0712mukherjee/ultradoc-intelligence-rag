@@ -5,7 +5,7 @@ Handles retrieval of relevant document chunks using embeddings
 and FAISS similarity search.
 """
 
-from typing import List, Dict, Tuple, Any
+from typing import List, Dict, Tuple
 from src.core.services.embedding_service import EmbeddingService
 from src.core.data.vector_store import VectorStore
 from src.config.settings import SIMILARITY_THRESHOLD, TOP_K_RETRIEVAL
@@ -31,9 +31,7 @@ class Retriever:
         self.embedding_service: EmbeddingService = embedding_service
         self.vector_store: VectorStore = vector_store
 
-    def retrieve(
-        self, query: str
-    ) -> Tuple[List[Dict[str, str]], float, List[Tuple[Dict[str, Any], float]]]:
+    def retrieve(self, query: str) -> Tuple[List[Dict[str, str]], float]:
         """
         Retrieve relevant chunks for a given query.
 
@@ -41,10 +39,9 @@ class Retriever:
             query (str): User question.
 
         Returns:
-            Tuple[List[Dict[str, str]], float, List[Tuple[Dict[str, Any], float]]]:
-                - List of relevant chunk metadata dictionaries (filtered by threshold)
+            Tuple[List[Dict[str, str]], float]:
+                - List of relevant chunk metadata dictionaries
                 - Maximum similarity score among retrieved chunks
-                - List of ALL raw search results (metadata, score) for metrics
         """
 
         # Generate embedding for user query
@@ -73,4 +70,4 @@ class Retriever:
                     }
                 )
 
-        return filtered_chunks, max_similarity_score, search_results
+        return filtered_chunks, max_similarity_score

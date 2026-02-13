@@ -35,27 +35,14 @@ async def ask_question(query: str, api_key: str) -> Dict:
 
     retriever: Retriever = Retriever(embedding_service, app_state.VECTOR_STORE_INSTANCE)
 
-    retrieved_chunks, max_similarity_score, all_results = retriever.retrieve(query)
+    retrieved_chunks, max_similarity_score = retriever.retrieve(query)
 
     guardrails: Guardrails = Guardrails()
-
-    # Calculate Precision@K metric
-    from src.core.evaluator.metrics import RetrievalMetrics
-    from src.config.settings import TOP_K_RETRIEVAL
-
-    precision_at_k = RetrievalMetrics.compute_precision_at_k(
-        all_results, TOP_K_RETRIEVAL
-    )
 
     validation = guardrails.validate_retrieval(retrieved_chunks, max_similarity_score)
 
     if validation.get("status") == "reject":
-        return {
-            "answer": validation.get("message"),
-            "confidence": 0.0,
-            "precision_at_k": precision_at_k,
-            "sources": [],
-        }
+        return {"answer": validation.get("message"), "confidence": 0.0, "sources": []}
 
     answer_generator: AnswerGenerator = AnswerGenerator(
         api_key, app_state.MEMORY_MANAGER_INSTANCE
@@ -79,14 +66,12 @@ async def ask_question(query: str, api_key: str) -> Dict:
             if answer == "Not found in document."
             else confidence_validation.get("message"),
             "confidence": confidence_score,
-            "precision_at_k": precision_at_k,
             "sources": [],
         }
 
     return {
         "answer": answer,
         "confidence": confidence_score,
-        "precision_at_k": precision_at_k,
         "sources": result.get("sources"),
     }
 

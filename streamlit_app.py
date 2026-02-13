@@ -114,10 +114,7 @@ def main() -> None:
             st.write(response.get("answer"))
 
             st.markdown("### Confidence Score")
-            st.write(round(response.get("confidence", 0.0), 4))
-
-            st.markdown("### Retrieval Metric (Precision@4)")
-            st.write(round(response.get("precision_at_k", 0.0), 4))
+            st.write(round(response.get("confidence"), 4))
 
             st.markdown("### Supporting Sources")
             st.text_area("Sources", value=response.get("sources", ""), height=200)
